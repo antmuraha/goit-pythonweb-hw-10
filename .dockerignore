@@ -1,0 +1,99 @@
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Byte-compiled / optimized / DLL files
+*.pyd
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage outputs
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+instance/
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# Docker files that may contain secrets or local overrides
+docker-compose.override.yml
+.docker-compose.override.yml
+
+# Git
+.git
+
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# Node modules (if present in project)
+node_modules/
+
+# Temporary files
+tmp/
+temp/
+venv/
+pip-wheel-metadata/
+
+# Misc
+*.swp
+*~
+.coverage
+
+.ruff_cache/
+__pycache__/
+.venv/
