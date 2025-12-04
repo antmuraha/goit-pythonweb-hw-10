@@ -14,12 +14,16 @@ RUN apt-get update \
 	libpq-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN pip install --upgrade pip
+# install uv from PyPI (safe under podman rootless)
+RUN pip install --upgrade pip \
+	&& pip install uv
 
 # Copy only pyproject first (leverage cache) and install dependencies
 COPY pyproject.toml /app/pyproject.toml
-RUN pip install --no-cache-dir .
+COPY uv.lock /app/uv.lock
+
+# Install project dependencies
+RUN uv pip install --system --no-cache .
 
 # Copy entrypoint script and make it executable
 COPY entrypoint.sh /app/entrypoint.sh
