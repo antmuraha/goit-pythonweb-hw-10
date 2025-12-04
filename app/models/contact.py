@@ -1,8 +1,8 @@
 from datetime import date
 from typing import Optional
 
-from sqlalchemy import String, Date
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Date, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..constants import (
     FIRST_NAME_MAX_LENGTH,
@@ -31,6 +31,12 @@ class Contact(Base):
     additional_data: Mapped[Optional[str]] = mapped_column(
         String(ADDITIONAL_DATA_MAX_LENGTH), nullable=True
     )
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    
+    # Relationship to User
+    owner: Mapped["User"] = relationship("User", back_populates="contacts")  # noqa: F821
 
     def __repr__(self) -> str:
         return (

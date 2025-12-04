@@ -12,6 +12,7 @@ from app.models.contact import Contact as ContactModel
 async def create_contact(
     db: AsyncSession,
     *,
+    user_id: int,
     first_name: str,
     last_name: str,
     email: str,
@@ -20,6 +21,7 @@ async def create_contact(
     additional_data: Optional[str] = None,
 ):
     contact = ContactModel(
+        user_id=user_id,
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -34,16 +36,25 @@ async def create_contact(
 
 
 async def get_contact_by_id(
-    db: AsyncSession, contact_id: int
+    db: AsyncSession, contact_id: int, user_id: int
 ) -> Optional[ContactModel]:
-    return await db.get(ContactModel, contact_id)
+    result = await db.execute(
+        select(ContactModel).where(
+            and_(ContactModel.id == contact_id, ContactModel.user_id == user_id)
+        )
+    )
+    return result.scalar_one_or_none()
 
 
 async def get_contacts(
-    db: AsyncSession, skip: int = 0, limit: int = 100
+    db: AsyncSession, user_id: int, skip: int = 0, limit: int = 100
 ) -> List[ContactModel]:
     result = await db.execute(
-        select(ContactModel).order_by(ContactModel.id.asc()).offset(skip).limit(limit)
+        select(ContactModel)
+        .where(ContactModel.user_id == user_id)
+        .order_by(ContactModel.id.asc())
+        .offset(skip)
+        .limit(limit)
     )
     return result.scalars().all()
 
@@ -51,6 +62,7 @@ async def get_contacts(
 async def search_contacts(
     db: AsyncSession,
     *,
+    user_id: int,
     first_name: Optional[str] = None,
     last_name: Optional[str] = None,
     email: Optional[str] = None,
@@ -62,7 +74,7 @@ async def search_contacts(
     All provided filters are combined with AND. If no filters provided, returns
     the normal paginated list.
     """
-    clauses = []
+    clauses = [ContactModel.user_id == user_id]
     if first_name:
         clauses.append(ContactModel.first_name.ilike(f"%{first_name}%"))
     if last_name:
@@ -70,8 +82,8 @@ async def search_contacts(
     if email:
         clauses.append(ContactModel.email.ilike(f"%{email}%"))
 
-    if not clauses:
-        return await get_contacts(db, skip=skip, limit=limit)
+    if len(clauses) == 1:  # Only user_id filter
+        return await get_contacts(db, user_id=user_id, skip=skip, limit=limit)
 
     stmt = (
         select(ContactModel)
@@ -84,7 +96,7 @@ async def search_contacts(
     return result.scalars().all()
 
 
-async def get_upcoming_birthdays(db: AsyncSession, days: int = 7) -> List[ContactModel]:
+async def get_upcoming_birthdays(db: AsyncSession, user_id: int, days: int = 7) -> List[ContactModel]:
     """Return contacts whose birthdays occur within the next `days` days.
 
     This performs a DB query to fetch contacts with non-null birthdays and
@@ -92,7 +104,9 @@ async def get_upcoming_birthdays(db: AsyncSession, days: int = 7) -> List[Contac
     (handles year wrap). Results are ordered by how soon the birthday occurs.
     """
     result = await db.execute(
-        select(ContactModel).where(ContactModel.birthday.is_not(None))
+        select(ContactModel).where(
+            and_(ContactModel.user_id == user_id, ContactModel.birthday.is_not(None))
+        )
     )
     contacts = result.scalars().all()
     today = date.today()
@@ -113,8 +127,12 @@ async def get_upcoming_birthdays(db: AsyncSession, days: int = 7) -> List[Contac
     return [c for _d, c in upcoming]
 
 
-async def get_contact_by_email(db: AsyncSession, email: str) -> Optional[ContactModel]:
-    result = await db.execute(select(ContactModel).where(ContactModel.email == email))
+async def get_contact_by_email(db: AsyncSession, email: str, user_id: int) -> Optional[ContactModel]:
+    result = await db.execute(
+        select(ContactModel).where(
+            and_(ContactModel.email == email, ContactModel.user_id == user_id)
+        )
+    )
     return result.scalars().first()
 
 

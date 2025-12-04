@@ -3,6 +3,8 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.dependencies.auth import get_current_active_user
+from app.models.user import User
 from app.schemas.contact import (
     ContactCreate,
     ContactRead,
@@ -17,15 +19,17 @@ from app.services.contact import (
 )
 from app.db.get_session import get_session
 
-router = APIRouter(prefix="/contacts", tags=["Contacts"])
+router = APIRouter(prefix="/api/v1/contacts", tags=["Contacts"])
 
 
 @router.post("/", response_model=ContactRead, status_code=status.HTTP_201_CREATED)
 async def create_contact_endpoint(
-    contact_in: ContactCreate, db: AsyncSession = Depends(get_session)
+    contact_in: ContactCreate,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user),
 ):
     try:
-        contact = await create_contact_service(db, contact_in)
+        contact = await create_contact_service(db, contact_in, current_user.id)
     except ValueError as exc:
         if str(exc) == "contact_exists":
             raise HTTPException(
@@ -45,6 +49,7 @@ async def list_contacts_endpoint(
     email: Optional[str] = None,
     upcoming: bool = False,
     db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user),
 ):
     """List contacts. Optional query params allow filtering by first_name,
     last_name or email (partial, case-insensitive). Use `upcoming=true` to
@@ -52,6 +57,7 @@ async def list_contacts_endpoint(
     """
     return await list_contacts_service(
         db,
+        user_id=current_user.id,
         skip=skip,
         limit=limit,
         first_name=first_name,
@@ -63,9 +69,11 @@ async def list_contacts_endpoint(
 
 @router.get("/{contact_id}", response_model=ContactRead)
 async def get_contact_endpoint(
-    contact_id: int, db: AsyncSession = Depends(get_session)
+    contact_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user),
 ):
-    contact = await get_contact_service(db, contact_id)
+    contact = await get_contact_service(db, contact_id, current_user.id)
     if not contact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
@@ -75,9 +83,12 @@ async def get_contact_endpoint(
 
 @router.put("/{contact_id}", response_model=ContactRead)
 async def update_contact_endpoint(
-    contact_id: int, contact_in: ContactUpdate, db: AsyncSession = Depends(get_session)
+    contact_id: int,
+    contact_in: ContactUpdate,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user),
 ):
-    contact = await update_contact_service(db, contact_id, contact_in)
+    contact = await update_contact_service(db, contact_id, contact_in, current_user.id)
     if not contact:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
@@ -87,9 +98,11 @@ async def update_contact_endpoint(
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_contact_endpoint(
-    contact_id: int, db: AsyncSession = Depends(get_session)
+    contact_id: int,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user),
 ):
-    ok = await delete_contact_service(db, contact_id)
+    ok = await delete_contact_service(db, contact_id, current_user.id)
     if not ok:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
