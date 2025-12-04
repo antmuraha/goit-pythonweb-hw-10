@@ -1,8 +1,8 @@
-# GoIT Full-Stack Python — FastAPI (Homework 08)
+# GoIT Full-Stack Python — FastAPI (Homework10)
 
 ## Summary
 
-This repository contains the code for GoIT homework 08. The project uses the FastAPI framework with a PostgreSQL database, SQLAlchemy models, and Alembic for schema migrations.
+This repository contains the code for GoIT homework. The project uses the FastAPI framework with a PostgreSQL database, SQLAlchemy models, and Alembic for schema migrations.
 
 ## Prerequisites
 
