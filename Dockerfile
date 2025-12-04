@@ -21,10 +21,6 @@ RUN pip install --upgrade pip
 COPY pyproject.toml /app/pyproject.toml
 RUN pip install --no-cache-dir .
 
-# Copy application source
-COPY . /app
-COPY .env /app/.env
-
 # Copy entrypoint script and make it executable
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
