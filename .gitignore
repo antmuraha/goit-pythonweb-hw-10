@@ -3,4 +3,5 @@ __pycache__/
 .vscode/
 *.pyc
 .ruff_cache/
+AVATAR_UPLOAD_FEATURE.md
 .env

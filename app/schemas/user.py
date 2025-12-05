@@ -22,6 +22,7 @@ class UserResponse(UserBase):
     """Schema for user response (no password)."""
     
     id: int
+    avatar_url: Optional[str] = None
     is_verified: bool
     is_active: bool
     created_at: datetime

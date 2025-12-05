@@ -30,3 +30,12 @@ SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", "noreply@example.com")
 SMTP_FROM_NAME = os.getenv("SMTP_FROM_NAME", "Application")
 SMTP_STARTTLS = os.getenv("SMTP_STARTTLS", "True").lower() in ("true", "1", "yes")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
+
+# Cloudinary configuration
+CLOUDINARY_CLOUD_NAME = os.getenv("CLOUDINARY_CLOUD_NAME", "")
+CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY", "")
+CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET", "")
+
+# Avatar upload configuration
+AVATAR_MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
+AVATAR_ALLOWED_TYPES = {"image/jpeg", "image/png"}

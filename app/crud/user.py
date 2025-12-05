@@ -94,3 +94,23 @@ async def update_user_active_status(db: AsyncSession, user_id: int, is_active: b
         await db.commit()
         await db.refresh(user)
     return user
+
+
+async def update_avatar(db: AsyncSession, user_id: int, avatar_url: str) -> Optional[User]:
+    """
+    Update a user's avatar URL.
+    
+    Args:
+        db: Database session
+        user_id: User's ID
+        avatar_url: New avatar URL from Cloudinary
+        
+    Returns:
+        Optional[User]: The updated user if found, None otherwise
+    """
+    user = await get_user_by_id(db, user_id)
+    if user:
+        user.avatar_url = avatar_url
+        await db.commit()
+        await db.refresh(user)
+    return user
