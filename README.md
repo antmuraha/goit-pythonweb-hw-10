@@ -2,7 +2,17 @@
 
 ## Summary
 
-This repository contains the code for GoIT homework. The project uses the FastAPI framework with a PostgreSQL database, SQLAlchemy models, and Alembic for schema migrations.
+This repository contains the code for GoIT homework. The project uses the FastAPI framework with a PostgreSQL database, SQLAlchemy models, and Alembic for schema migrations, and builds on prior work from https://github.com/antmuraha/goit-pythonweb-hw-08.
+
+Homework focus:
+
+-   Authentication for the app
+-   JWT-based authorization: contact CRUD only for logged-in users
+-   Per-user contact access isolation
+-   Email verification for registered users
+-   Rate limit the `/me` endpoint
+-   Enable CORS for the REST API
+-   Allow users to update avatars via Cloudinary
 
 ## Prerequisites
 
@@ -14,7 +24,21 @@ Copy the example env file and edit values as needed:
 ```bash
 cp .env.example .env
 # Edit .env to set your POSTGRES_PASSWORD and other values
+
+# Debug Mode (no SMTP): Verification links will print to console
+# Production Mode: Set these environment variables for email sending:
+
+SMTP_HOST # (e.g., smtp.gmail.com)
+SMTP_USER
+SMTP_PASSWORD
+SMTP_FROM_EMAIL
 ```
+
+### Local SMTP for testing
+
+-   Docker Compose includes a Mailpit service (`dev-smtp`) for local SMTP.
+-   Use the defaults from `.env.example`: `SMTP_LOCAL_DEBUG=True`, `SMTP_HOST=dev-smtp`, `SMTP_PORT=1025`.
+-   Open the Mailpit web UI at http://localhost:8025 to view captured emails.
 
 ## Local development
 
@@ -25,10 +49,12 @@ Recommended (using `uv`):
 ```bash
 # Create a virtual environment and install dependencies
 uv venv
-uv sync
 
 # Activate the created environment (choose the path created by your tool):
 source .venv/bin/activate
+
+# Sync and install dependencies
+uv sync
 ```
 
 If you don't use `uv`, create and activate a virtual environment with your preferred tool and install dependencies from the lock/manifest used in the project.
@@ -67,7 +93,12 @@ The Docker image uses the repository `entrypoint.sh` (included at the project ro
 -   Runs `alembic upgrade head` to apply schema migrations. The script uses a simple retry loop (the bundled script sets `MAX_RETRIES=1` and waits 2 seconds between attempts). If migrations fail after the configured retries the container exits with a non-zero status.
 -   After migrations complete successfully the script execs the container CMD, making the app process PID 1.
 
-This behavior is convenient for development and simple deployments because it ensures the database schema is applied automatically on startup. For production environments, this is not recommended to be used without understanding this process.
+This behavior is convenient for development and simple deployments because it ensures the database schema is applied automatically on startup. For production environments, use this only if you accept the automatic migration flow.
+
+## Quick check
+
+-   Open Swagger UI at `/docs`.
+-   Authorize with an existing user (login + password). On success the token is stored and private endpoints become available.
 
 ## Contributing / Next steps
 
